@@ -4,7 +4,7 @@ import React from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../form';
 import { Input } from '../input';
 import { Control } from 'react-hook-form';
-import { FormFieldType } from '../forms/PatientForm';
+import { FormFieldType } from '../../forms/PatientForm';
 import Image from 'next/image';
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';

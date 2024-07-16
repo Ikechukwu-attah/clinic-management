@@ -1,13 +1,11 @@
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import PatientForm from '@/components/forms/PatientForm';
-import Link from 'next/link';
+import RegisterForm from '@/components/forms/RegisterForm'
+import Image from 'next/image'
+import Link from 'next/link'
+import React from 'react'
 
-const Home = ({ searchParams }: SearchParamProps) => {
-  const isAdmin = searchParams?.admin === "true";
-
+const Register = () => {
   return (
-    <div className="flex h-screen max-h-screen">
+       <div className="flex h-screen max-h-screen">
       {/* {isAdmin && <PasskeyModal />} */}
 
       <section className="remove-scrollbar container my-auto">
@@ -20,7 +18,7 @@ const Home = ({ searchParams }: SearchParamProps) => {
             className="mb-12 h-10 w-fit"
           />
 
-          <PatientForm />
+          <RegisterForm />
 
           <div className="text-14-regular mt-20 flex justify-between">
             <p className="justify-items-end text-dark-600 xl:text-left">
@@ -34,14 +32,14 @@ const Home = ({ searchParams }: SearchParamProps) => {
       </section>
 
       <Image
-        src="/assets/images/onboarding-img.png"
+       src="/assets/images/register-img.png"
         height={1000}
         width={1000}
         alt="patient"
-        className="side-img max-w-[50%]"
+        className="side-img max-w-[390px]"
       />
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Register
