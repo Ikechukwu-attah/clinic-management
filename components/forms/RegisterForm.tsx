@@ -5,19 +5,20 @@ import React, { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { userFormValidationSchema } from '@/lib/validation';
+import { PatientFormValidation } from '@/lib/validation';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import CustomFormField from '../ui/customFormField/customFormField';
 import SubmitButton from '../ui/submitButton/submitButton';
-import { createUser } from '@/lib/actions/patient.action';
+import { createUser, registerPatient } from '@/lib/actions/patient.action';
 import { FormFieldType } from './PatientForm';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { Doctors, GenderOptions, IdentificationTypes } from '@/constants';
+import { Doctors, GenderOptions, IdentificationTypes, PatientFormDefaultValues } from '@/constants';
 import { Label } from '../ui/label';
 import { SelectItem } from '../ui/select';
 import Image from 'next/image';
 import FileUploader from '../FileUploader';
 import { on } from 'events';
+import { blob } from 'stream/consumers';
 
 
 
@@ -28,9 +29,10 @@ const RegisterForm = ({user}:{user:User}) => {
      const router = useRouter();
 	const[isLoading, setIsLoading] = useState(false);
 	// 1. Define your form.
-	const form = useForm<z.infer<typeof userFormValidationSchema>>({
-		resolver: zodResolver(userFormValidationSchema),
-		defaultValues: {
+	const form = useForm<z.infer<typeof PatientFormValidation>>({
+		resolver: zodResolver(PatientFormValidation),
+        defaultValues: {
+            ...PatientFormDefaultValues,
 			name: '',
 			email: '',
 			phone: ''
@@ -38,20 +40,28 @@ const RegisterForm = ({user}:{user:User}) => {
 	});
 
 	// 2. Define a submit handler.
-	async function onSubmit({name,email,phone}: z.infer<typeof userFormValidationSchema>) {
+	async function onSubmit(values: z.infer<typeof PatientFormValidation>) {
 		setIsLoading(true);
+        let formData;
+        if (values.identificationDocument && values.identificationDocument.length > 0) {
+            const blobFile = new Blob([values.identificationDocument[0]], { type: values.identificationDocument[0].type })
+                 formData = new FormData();
+            formData.append('blobFle', blobFile);
+            formData.append('filename', values.identificationDocument[0].name);
+        }
 
+       
 		try {
-			const userData = {
-				name,
-				email,
-				phone
-			};
-
-			console.log(userData);
-			const user = await createUser(userData);
-			console.log(user)
-			if(user) router.push(`/patients/${user.$id}/register`);
+			
+            const patientData = {
+                ...values,
+                userId: user.$id,
+                birthDate: new Date(values.birthDate),
+                identificationDocument: formData
+          }
+			//@ts-ignore
+            const patient = await registerPatient(patientData);
+            if(patient)router.push(`/patients/${user.$id}/new-appointment`);
 		} catch (error) {
 			console.log(error);
 		}

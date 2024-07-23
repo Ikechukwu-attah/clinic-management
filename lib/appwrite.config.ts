@@ -2,7 +2,7 @@ import * as sdk from 'node-appwrite';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const {
+export const {
     PROJECT_ID,
     API_KEY,
     DATABASE_ID,
