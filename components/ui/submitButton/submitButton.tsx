@@ -15,7 +15,7 @@ const SubmitButton = ({ isLoading, className, children }: ButtonProps) => {
               Loading...
         </div>):(children)}
         
-        Submit
+        
     </Button>);
 };
 

@@ -35,7 +35,8 @@ const RegisterForm = ({user}:{user:User}) => {
             ...PatientFormDefaultValues,
 			name: '',
 			email: '',
-			phone: ''
+			phone: '',
+            gender: 'male' // Set a default value that matches the expected type
 		}
 	});
 
@@ -141,8 +142,8 @@ const RegisterForm = ({user}:{user:User}) => {
                                 {GenderOptions.map((option) => (
                                     <div key={option} className='radio-group'>
 
-                                        <RadioGroupItem value={option} id={option} />
-                                        <Label htmlFor={option} className='cursor-pointer'>{option }</Label>
+                                        <RadioGroupItem value={option.toLowerCase()} id={option} />
+                                        <Label htmlFor={option} className='cursor-pointer'>{option}</Label>
                                         
                                     </div>
                                 ))}
