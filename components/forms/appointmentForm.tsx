@@ -17,6 +17,7 @@ import { SelectItem } from '../ui/select';
 import Image from 'next/image';
 import App from 'next/app';
 import { createAppointment } from '@/lib/actions/appointment.action';
+import { Appointment } from '@/types/appwrite.types';
 
 export enum FormFieldType {
 	INPUT = 'input',
@@ -32,7 +33,7 @@ export enum FormFieldType {
 
 
 
-const AppointmentForm = ({userId, patientId, type}:{userId:string, patientId:string, type:"create"|"cancel" | "schedule"}) => {
+const AppointmentForm = ({userId, patientId, type,appointment,setOpen}:{userId:string, patientId:string, type:"create"|"cancel" | "schedule",appointment?:Appointment,setOpen:(open:boolean)=>void}) => {
   const router = useRouter();
 	const[isLoading, setIsLoading] = useState(false);
 	// 1. Define your form.
