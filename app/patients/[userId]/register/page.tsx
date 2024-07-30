@@ -3,10 +3,12 @@ import { getUser } from '@/lib/actions/patient.action'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { use } from 'react'
+import * as Sentry from '@sentry/react'
 
 const Register = async ({params:{userId}}:SearchParamProps) => {
   
-    const user = await getUser(userId)
+  const user = await getUser(userId)
+  Sentry.metrics.set("user_view_register", user.name)
   return (
        <div className="flex h-screen max-h-screen">
       {/* {isAdmin && <PasskeyModal />} */}

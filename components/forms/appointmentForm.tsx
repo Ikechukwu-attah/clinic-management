@@ -16,8 +16,9 @@ import { Doctors } from '@/constants';
 import { SelectItem } from '../ui/select';
 import Image from 'next/image';
 import App from 'next/app';
-import { createAppointment } from '@/lib/actions/appointment.action';
+import { createAppointment, updateAppointment } from '@/lib/actions/appointment.action';
 import { Appointment } from '@/types/appwrite.types';
+import { stat } from 'fs';
 
 export enum FormFieldType {
 	INPUT = 'input',
@@ -33,18 +34,25 @@ export enum FormFieldType {
 
 
 
-const AppointmentForm = ({userId, patientId, type,appointment,setOpen}:{userId:string, patientId:string, type:"create"|"cancel" | "schedule",appointment?:Appointment,setOpen:(open:boolean)=>void}) => {
+const AppointmentForm = ({ userId, patientId, type, appointment, setOpen }:
+	{
+		userId: string,
+		patientId: string,
+		type: "create" | "cancel" | "schedule",
+		appointment?: Appointment,
+		setOpen: (open: boolean) => void
+	}) => {
   const router = useRouter();
 	const[isLoading, setIsLoading] = useState(false);
 	// 1. Define your form.
 	const form = useForm<z.infer<typeof AppointmentFormValidation>>({
 		resolver: zodResolver(AppointmentFormValidation),
 		defaultValues: {
-			primaryPhysician: '',
-			schedule: new Date(),
-			reason: '',
-			note: '',
-			cancellationReason: '',
+			primaryPhysician: appointment ? appointment.primaryPhysician:'',
+			schedule: appointment ? new Date(appointment.schedule) : new Date(),
+			reason: appointment ? appointment.reason : '',
+			note: appointment ? appointment.note : '',
+			cancellationReason: appointment?.cancellationReason || '',
 		}
 	});
 
@@ -107,6 +115,26 @@ const AppointmentForm = ({userId, patientId, type,appointment,setOpen}:{userId:s
 					form.reset();
 					router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`);
 				}
+			} else {
+				const appointmentToUpdate = {
+					userId,
+					appointmentId: appointment?.$id!,
+					appointment: {
+						primaryPhysician: values?.primaryPhysician,
+						schedule: new Date(values?.schedule),
+						status: status as Status,
+						cancellationReason: values?.cancellationReason,
+						
+
+					},
+					type
+				}
+
+				const updatedAppointment = await updateAppointment(appointmentToUpdate);
+				if (updatedAppointment) {
+					setOpen && setOpen(false);
+					form.reset();
+				}
 			}
 
 			
@@ -121,10 +149,10 @@ const AppointmentForm = ({userId, patientId, type,appointment,setOpen}:{userId:s
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
-				<section className=" mb-12 space-y-4">
+				{type === 'create' &&(<section className=" mb-12 space-y-4">
 					<h1 className="header">New Appointment </h1>
 					<p className="text-dark-700700">Request for a new appointment</p>
-                </section>
+                </section> )}
                 {type !== "cancel" && (
                     <>
                         <CustomFormField
@@ -192,7 +220,7 @@ const AppointmentForm = ({userId, patientId, type,appointment,setOpen}:{userId:s
 				
 
 				
-				<SubmitButton isLoading={isLoading} className={`${type === 'cancel' ? 'shade-danger-btn' : 'shad-primary-btn'} w-full`}>{buttonLabel}</SubmitButton>
+				<SubmitButton isLoading={isLoading} className={`${type === 'cancel' ? 'shad-danger-btn' : 'shad-primary-btn'} w-full`}>{buttonLabel}</SubmitButton>
 			</form>
 		</Form>
 	);

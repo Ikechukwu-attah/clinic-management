@@ -6,9 +6,12 @@ import Link from 'next/link';
 import App from 'next/app';
 import AppointmentForm from '@/components/forms/appointmentForm';
 import { getPatient } from '@/lib/actions/patient.action';
+import * as Sentry from '@sentry/react'
+
 
 const NewAppointment = async ({ params: { userId } }: SearchParamProps) => {
   const patient = await getPatient(userId);
+   Sentry.metrics.set("user_view_new-appointment", patient.name)
   return (
      <div className="flex h-screen max-h-screen">
       {/* {isAdmin && <PasskeyModal />} */}

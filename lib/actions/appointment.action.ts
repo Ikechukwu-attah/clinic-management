@@ -1,9 +1,10 @@
 'use server'
 
 import { ID, Query } from "node-appwrite";
-import { APPOINTMENT_COLLECTION_ID, BUCKET_ID, DATABASE_ID, databases, ENDPOINT } from "../appwrite.config";
-import { parseStringify } from "@/app/lib/utils";
+import { APPOINTMENT_COLLECTION_ID, BUCKET_ID, DATABASE_ID, databases, ENDPOINT, messaging } from "../appwrite.config";
+import { formatDateTime, parseStringify } from "@/app/lib/utils";
 import { Appointment } from "@/types/appwrite.types";
+import { revalidatePath } from "next/cache";
 
 
 export const createAppointment = async (appointment: CreateAppointmentParams) => {
@@ -70,5 +71,46 @@ export const getRecentAppointmentList = async () => {
         return parseStringify(data);
     } catch (error) {
         console.log(error)
+    }
+}
+
+
+
+
+export const updateAppointment = async ({ userId, appointmentId, appointment, type }: UpdateAppointmentParams) => {
+    try {
+        const updatedAppointment = await databases.updateDocument(DATABASE_ID!, APPOINTMENT_COLLECTION_ID!, appointmentId,
+            appointment);
+    
+        
+        if(!updatedAppointment) {
+            throw new Error("Appointment not found");
+        }
+
+        // Todo SMS Notification
+
+        const smsMessage = `Hi, it is HealthCare. ${type === 'schedule' ? `
+        Your appointment has been scheduled at ${formatDateTime(appointment.schedule!).dateTime} with Dr. ${appointment.primaryPhysician}.
+        
+        `:`We regret to inform you that your appointment has been cancelled. Reason:${appointment.cancellationReason}`}`
+
+
+        await sendSMSNotification(userId, smsMessage)
+        revalidatePath('/admin')
+        return parseStringify(updatedAppointment);
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+
+export const sendSMSNotification = async (userId: string, content: string) => {
+    try {
+        const message = await messaging.createSms(ID.unique(),content,[],[userId]);
+   
+      return parseStringify(message);
+    } catch (error) {
+        
     }
 }

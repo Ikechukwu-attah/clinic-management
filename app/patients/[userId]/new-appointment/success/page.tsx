@@ -5,11 +5,17 @@ import React from 'react'
 import { Doctors } from '../../../../../constants/index';
 import { formatDateTime } from '@/app/lib/utils';
 import { Button } from '@/components/ui/button';
+import * as Sentry from '@sentry/react'
+import { getUser } from '@/lib/actions/patient.action';
+
 
 const Success = async ({params:{userId},searchParams}: SearchParamProps) => {
     const appointmentId = (searchParams?.appointmentId as string) || '';
     const appointment = await getAppointment(appointmentId);
-   const doctor = Doctors.find((doctor)=>doctor.name === appointment.primaryPhysician);
+    const doctor = Doctors.find((doctor) => doctor.name === appointment.primaryPhysician);
+    const user = await getUser(userId);
+    Sentry.metrics.set("user_view_appointment-success", user.name)
+
     return (
       <div className='flex h-screen  max-h-screen px-[5%]'>Success
           <div className='success-img'>
